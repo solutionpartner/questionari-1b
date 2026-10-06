@@ -966,5 +966,54 @@ var I18N_DYN = {
   }
 </script>
 
+<script>
+/* ===== Flux pas a pas: una àrea (A-I) per pantalla amb Següent/Enrere ===== */
+(function(){
+  var quiz = document.getElementById('quizStep');
+  if(!quiz) return;
+  // recull els <section> (àrees A-I) fills directes de quizStep
+  var secs = [];
+  for(var c = quiz.firstChild; c; c = c.nextSibling){
+    if(c.nodeType === 1 && c.tagName.toLowerCase() === 'section') secs.push(c);
+  }
+  var acts = [];
+  for(var x = quiz.firstChild; x; x = x.nextSibling){
+    if(x.nodeType === 1 && x.classList && x.classList.contains('actions')) acts.push(x);
+  }
+  if(secs.length < 2) return;
+  var tot = secs.length, cur = 0;
+  var UI = {
+    ca:{next:'Següent →', back:'← Enrere', area:'Àrea', sep:'de'},
+    es:{next:'Siguiente →', back:'← Atrás', area:'Área', sep:'de'},
+    en:{next:'Next →', back:'← Back', area:'Area', sep:'of'}
+  };
+  function lbl(){ return (UI[curLang] || UI.ca); }
+
+  var prev = document.createElement('button'), next = document.createElement('button'), ind = document.createElement('span');
+  prev.type = 'button'; next.type = 'button'; prev.id = 'qPrev'; next.id = 'qNext'; ind.id = 'qInd';
+  prev.style.cssText = 'background:#fff;color:#0b1d32;border:1.5px solid #0b1d32;font-weight:700;padding:12px 22px;border-radius:10px;cursor:pointer;font-size:1rem;';
+  next.style.cssText = 'background:#0b1d32;color:#fff;font-weight:700;padding:12px 26px;border-radius:10px;border:none;cursor:pointer;font-size:1rem;';
+  ind.style.cssText = 'font-weight:800;font-size:.95rem;color:#0b1d32;min-width:130px;text-align:center;';
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;justify-content:center;align-items:center;gap:16px;margin-top:22px;';
+  wrap.appendChild(prev); wrap.appendChild(ind); wrap.appendChild(next);
+  quiz.appendChild(wrap);
+
+  function show(i){
+    cur = Math.max(0, Math.min(tot - 1, i));
+    secs.forEach(function(s, j){ s.style.display = (j === cur) ? 'block' : 'none'; });
+    acts.forEach(function(a){ a.style.display = (cur === tot - 1) ? 'block' : 'none'; });
+    var u = lbl();
+    prev.textContent = u.back; prev.style.visibility = (cur === 0) ? 'hidden' : 'visible';
+    next.textContent = u.next; next.style.visibility = (cur === tot - 1) ? 'hidden' : 'visible';
+    ind.textContent = u.area + ' ' + (cur + 1) + ' ' + u.sep + ' ' + tot;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  next.addEventListener('click', function(){ show(cur + 1); });
+  prev.addEventListener('click', function(){ show(cur - 1); });
+  show(0);
+})();
+</script>
+
 </body>
 </html>
